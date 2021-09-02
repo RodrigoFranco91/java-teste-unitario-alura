@@ -1,0 +1,59 @@
+Neste capítulo vamos lidar com as Exceptions!
+
+E se um método lança Exception, como testá-lo? Para mostrar esse cenário mudamos a classe BonusService, agora se um funcionário tiver
+selario maior que mil reais uma Exception será lançada. Veja como ficou a classe:
+
+	public class BonusService {
+
+		public BigDecimal calcularBonus(Funcionario funcionario) {
+			BigDecimal valor = funcionario.getSalario().multiply(new BigDecimal("0.1"));
+
+			if (valor.compareTo(new BigDecimal("1000")) > 0) {
+				throw new IllegalArgumentException("Funcionário com salário maior do que R$1000.00 não pode receber 				bonus.");
+			}
+			return valor.setScale(2, RoundingMode.HALF_UP);
+		}
+
+	}
+	
+
+Já tinhamos um teste para esse cenário, era o método bonusDeveriaSerZeroParaFuncionarioComSalarioMuitoAlto(), vamos alterá-lo para
+agora ele verificar se ocorreu a exception, pois esse é o valor que temos que obter! Há duas maneiras para se fazer isso:
+
+Método 1 (usando assertThrows):
+
+	    @Test
+	    void bonusDeveriaSerZeroParaFuncionarioComSalarioMuitoAlto(){
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("25000"));
+		BonusService service = new BonusService();
+
+		//O primeiro argumento do método é o tipo de Exception esperado, e o segundo argumento é a chamada
+		// do metodo usando lambda!
+		Assertions.assertThrows( IllegalArgumentException.class, () -> service.calcularBonus(funcionario));
+
+	    }
+	    
+Método 2 (usando try-catch):
+
+	    @Test
+	    void bonusDeveriaSerZeroParaFuncionarioComSalarioMuitoAlto(){
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("25000"));
+		BonusService service = new BonusService();
+
+		try{
+		    service.calcularBonus(funcionario);
+		    fail("Não deu a Exception que eu esperava!");
+		    //Se chegar aqui é porque o teste falhou, como eu espero um exception após chamar o método tem que ir pro catch
+		}catch (IllegalArgumentException e){
+		    //Comparando se a mensagem de exception é a esperada!
+		    Assertions.assertEquals("Funcionário com salário maior do que R$1000.00 não pode receber bonus.", e.getMessage());
+		}
+	    }
+	    
+	    
+Tenha em mente que há testes que o método vai retornar um valor e depois vamos comparar esse valor;
+
+Há testes que vão alterar o valor de um objeto, ou seja, o metodo não retorna nada mas altera o objeto e a verificação é em cima do 
+objeto;
+
+Há testes que será para verificar se foi lançada uma Exception!

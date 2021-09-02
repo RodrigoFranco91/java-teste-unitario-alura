@@ -1,0 +1,148 @@
+Neste capítulo falamos sobre TDD (Test Driven Development):
+
+TDD é uma tecnica/prática de se fazer o teste antes do código/implementação de uma funcionalidade! O teste vai guiar a implementação.
+O cenário será: cria o teste roda e falha, pois não há implementação! -> Cria a implementação bśica para passar o teste -> refatoração
+do código que já passou no teste.
+
+
+Aplicando o TDD. Veja a regra de negócio da nova funcionalidade: Se funcionário tiver desempenho "A desejar" o reajuste será de de 3%, 
+se desemepnho for "Bom" reajuste será de 15% e se for "Ótimo" o reajuste será de 20%. Vamos criar o teste para esse funcionalidade que
+não tem implementação.
+
+Aplicando o TDD:
+
+1) Criamos a classe ReajusteServiceTest;
+
+	public class ReajusteServiceTest {
+
+	}
+
+2) Criar o teste para quando desempenho a desejar:
+
+	    @Test
+	    public void reajusteDeveriaSerDeTresPorcentoQuandoDesemepnhoForADesejar(){
+		ReajusteService service = new ReajusteService();
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("1000.00"));
+
+		service.concederReajuste(funcionario, Desempenho.A_DESEJAR);
+		Assertions.assertEquals(new BigDecimal("1030.00"), funcionario.getSalario());
+	    }
+	    
+	    A classe está cheio de erro, pois não existe a classe ReajusteService e seus métodos. Vamos criar tudo isso no próximo
+	    passo.
+	    
+3) Agora sim fiz a implementação desse cenário, criei a classe ReajusteService, criei o ENUM Desempenho com a constante A_DESEJAR,
+na classe funcionário criei o método reajustarSalario e na classe ReajusteService criei o método concederReajuste. Veja o código
+de algumas implementações:
+
+	public class ReajusteService {
+
+	    public void concederReajuste(Funcionario funcionario, Desempenho desemepnho) {
+		if(desemepnho.equals(Desempenho.A_DESEJAR)){
+		    BigDecimal reajuste = funcionario.getSalario().multiply(new BigDecimal("0.03"));
+		    funcionario.reajustarSalario(reajuste);
+		}
+	    }
+	}
+	
+	
+	
+	public enum Desempenho {
+    		A_DESEJAR
+	}
+	
+	
+	public void reajustarSalario(BigDecimal reajuste) {
+		this.salario = this.salario.add(reajuste).setScale(2, RoundingMode.HALF_UP);
+   	}
+   	
+   	
+4)Criamos os testes dos outros dois cenários, ficando assim:
+
+	    @Test
+	    public void reajusteDeveriaSerDeQuinzePorcentoQuandoDesemepnhoForBom(){
+		ReajusteService service = new ReajusteService();
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("1000.00"));
+
+		service.concederReajuste(funcionario, Desempenho.BOM);
+		Assertions.assertEquals(new BigDecimal("1150.00"), funcionario.getSalario());
+	    }
+
+	    @Test
+	    public void reajusteDeveriaSerDeVintePorcentoQuandoDesemepnhoForOtimo(){
+		ReajusteService service = new ReajusteService();
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("1000.00"));
+
+		service.concederReajuste(funcionario, Desempenho.OTIMO);
+		Assertions.assertEquals(new BigDecimal("1200.00"), funcionario.getSalario());
+	    }	
+	    
+	    
+	    Na classe ReajusteService ganhous mais dois trechos de IF:
+	    
+		if(desemepnho.equals(Desempenho.BOM)){
+		    BigDecimal reajuste = funcionario.getSalario().multiply(new BigDecimal("0.15"));
+		    funcionario.reajustarSalario(reajuste);
+		}
+		
+		if(desemepnho.equals(Desempenho.OTIMO)){
+		    BigDecimal reajuste = funcionario.getSalario().multiply(new BigDecimal("0.20"));
+		    funcionario.reajustarSalario(reajuste);
+		}
+		
+		
+5) Agora é a vez de fazer a refatoração (terceiro passo do TDD) e após a refatoração há risco de estragarmos algo! Mas como já temos
+testes aprovados, basta rodar os testes e ver se continua passando! Vamos usar o padrão de projeto Strategy no código da classe 
+Reajuste Service, para isso vamos colocar nas constantes de ENUM um método que devolve a porcentagem de reajuste. Veja como ficará:
+
+ENUM:
+
+	public enum Desempenho {
+	    A_DESEJAR{
+		@Override
+		public BigDecimal percentualReajuste() {
+		    return new BigDecimal("0.03");
+		}
+	    },
+	    BOM {
+		@Override
+		public BigDecimal percentualReajuste() {
+		    return new BigDecimal("0.15");
+		}
+	    },
+	    OTIMO {
+		@Override
+		public BigDecimal percentualReajuste() {
+		    return new BigDecimal("0.20");
+		}
+	    };
+	    
+	    //Cada constante terá que implementar esse método
+	    public abstract BigDecimal percentualReajuste();
+
+	}
+
+Classe service:
+
+	public class ReajusteService {
+
+	    public void concederReajuste(Funcionario funcionario, Desempenho desemepnho) {
+
+		BigDecimal percentual = desemepnho.percentualReajuste();
+		BigDecimal reajuste = funcionario.getSalario().multiply(percentual);
+		funcionario.reajustarSalario(reajuste);
+
+	    }
+	}
+
+
+Qual as vantagens do TDD?
+
+1- O código já sai testado!
+2- Evita o teste viciado, ou seja, criar teste pensando na implementação e não para o comportamento!
+3- A refatoração vai fazer parte do processo!
+4- Ajuda a manter o foco, vamos implementar somente no cenário que eu já fiz o teste, vai passo a passo...
+5- Aumenta a tendência de escrever um código mais simples!
+
+E devemos usar TDD sempre?
+Normalmente o ideal é aplicar o TDD quando não sabemos como implementar o cenário! Um código não trivial! Com regras de negócio!

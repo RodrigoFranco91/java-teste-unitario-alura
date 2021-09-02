@@ -1,0 +1,38 @@
+Neste capítulo discutimos o motivo/motivação de se fazer testes automatizado.
+
+Chegamos na conclusão que com testes vamos saber se o código está funcionando como deveria em todos os cenários possiveis.
+
+Testes manuais são: chato de se fazer, lentos, sujeito a falhas (é ser humano fazendo).
+
+Testes automatizados são: é automático, feedback é mais rápido, da segurança para mexer no código (refatorar). 
+
+
+Escrevendo o primeiro teste automatizado:
+
+	Classe de negócio:
+	
+		public class Calculadora {
+
+			public int somar(int a, int b) {
+				return a+b;
+			}
+			
+		}
+
+
+	Fazendo teste, instanciando objeto Calculadora:
+	
+		public class CalculadoraTesteMain {
+			
+			public static void main(String[] args) {
+				
+				Calculadora calc = new Calculadora();
+				int soma = calc.somar(3, 7);
+				System.out.println(soma);
+			}
+
+		}
+		
+	Teremos diversos cenários de teste, ou seja, passar numeros negativos, zero, entre outros. Temos que testar todos os cenários.
+	Só que dessa maneira que estamos fazendo, temos que olhar o resultado na tela, o teste já está automatizado, mas ainda está
+	trabalhoso! No próximo capítulo vamos utilizar o JUnit, que é uma biblioteca para facilitar a criação de um teste.

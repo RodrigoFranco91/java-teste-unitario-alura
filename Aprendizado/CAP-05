@@ -1,0 +1,38 @@
+Neste capítulo vamos falar sobre boas práticas e outros recursos disponiveis em testes!
+
+Em todo cenário de teste há uma repetição de código, por exemplo: em todo teste eu crio uma instancia de ReajusteService e crio um
+objeto funcionário. Uma maneira de melhorar isso é isolar esses dois como atributos da classe e criar um método que inicializa essas
+variáveis! Veja como ficou:
+
+	    @BeforeEach
+	    public void inicializar(){
+		 funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("25000"));
+		 service = new BonusService();
+	    }
+	    
+	    Com a anotação @BeforeEach o método inicializar() será chamado antes de cada teste, e por isso em cada método de teste
+	    não precisará mais criar um Funcionario e um BonusService. Veja como ficará cada método de teste:
+	    
+	    @Test
+	    void bonusDeveSer10PorCentoDoSalario(){
+		BigDecimal bonus = service.calcularBonus(funcionario);
+		Assertions.assertEquals(new BigDecimal("250.00"), bonus);
+	    }
+	    
+Há outras anotações do JUnit, veja:
+
+@AfterEach = podemos colocar essa anotação em um método e após cada método de teste o método anotado com @AfterEach é chamado!
+@AfterAll = podemos colocar essa anotação em um método e depois de terminar todos os testes é executado (só é executado 1x);
+@BeforeAll = podemos colocar essa anotação em um método e antes de iniciar os testes é executado (só é executado 1x);
+
+Obs: Métodos anotados com @AfeterAll e @BeforeAll tem que ser estatico.
+
+
+E métodos privados, como testá-los? Não precisa! Um método privado é chamado em outro método da classe e se você estiver testando a 
+classe certamente já vai estar testando o método privado!
+
+
+E o que devemos testar? Devemos testar todas as classes?
+Num projeto não vamso testar todas classes e métodos! Por exemplo, a classe Funcionario só tem atributos, getters e setters, logo não
+faz sentido testar, tanto é que esses códigos a própria IDE que fez. 
+Devemos testar classes com regra de negócio, que podem ter alterações constantes!

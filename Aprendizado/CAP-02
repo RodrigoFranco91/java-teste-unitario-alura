@@ -1,0 +1,77 @@
+Neste capítulo falamos sobre o JUnit, biblioteca que nos ajuda a criar testes (testes unitário). Essa biblioteca é gratuita e open 
+source.
+
+Com JUnit não vamos fazer teste como fizemos no primeiro capítulo, ou seja, não vamos rodar testes dentro de uma classe main para ver
+o resultado no console.
+
+
+Criando o primeiro teste com JUnit. Siga os passos:
+
+1. Crie a classe CalculadoraTest, pois vamos testar a classe Calculadora;
+
+2. Cada cenário de teste será um método da classe CalculadoraTest. Todo método de teste deve ser anotado com @Test. Veja:
+
+	@Test
+	public void deveriaSomarDOisNumerosPositivos() {
+		Calculadora calc = new Calculadora();
+		int soma = calc.somar(3, 7);
+		Assertions.assertEquals(10, soma);
+	}
+	
+	Ao anotar o método com @Test a IDE vai sugerir para adicionar o JUnit no projeto, vamos aceitar (essa é uma maneira de 
+	adicionar a biblioteca no projeto).
+	
+	A classe Assertions (poderia ser Assert) é a classe que faz verificação do resultado obtido com o valor desejado. Veja que
+	nesse exemplo o resultado esperado é 10 e o valor obtido foi soma, se forem iguais o teste passa! Basta rodar a classe como
+	test.
+	
+	
+A partir de agora vamos usar um projeto disponibilizado pelo professor, para continuar o curso.
+Neste projeto já há a pasta src/test/java será nesta pasta que vamos adicionar as classes de teste.
+Neste projeto o JUnit foi adicionado pelo maven, ou seja, foi declarado no arquivo pom.xml
+
+Criando o teste do novo projeto, no caso será um teste para classe BonusService. Sia os passos:
+
+1) Estou usando o Intellij, selecionei a classe BonusService e aprtei ctrl+insert e selecionei test, com isso a classe 
+BonusServiceTest foi criada já na pasta src/test/java. Veja a classe criada:
+
+	class BonusServiceTest {
+
+
+	}
+
+2) Vamos criar o método de teste. Queremos testar se o bonus de um salário alto é zero, pois o bonus permitido é até mil reais. O 
+método de teste deve ter um nome que explica o teste, veja:
+
+	    @Test
+	    void bonusDeveriaSerZeroParaFuncionarioComSalarioMuitoAlto(){
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("25000"));
+		BonusService service = new BonusService();
+		BigDecimal bonus = service.calcularBonus(funcionario);
+
+		Assertions.assertEquals(BigDecimal.ZERO, bonus);
+	    }
+	    
+3) Agora vamos criar o teste para verificar se o bonus de um salárioa de 2500 é de fato 250 (10%), veja o método criado para esse 
+teste:
+
+	    @Test
+	    void bonusDeveSer10PorCentoDoSalario(){
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("2500"));
+		BonusService service = new BonusService();
+		BigDecimal bonus = service.calcularBonus(funcionario);
+
+		Assertions.assertEquals(new BigDecimal("250.00"), bonus);
+	    }
+	    
+4) Quando estamos testando valores, devemos ter um teste para valor inferior, igual e maior que o limite. Então falta o teste para
+uma salário de 10000, pois o bonus nesse caso será de 1000. Veja o teste:
+
+	    @Test
+	    void bonusDeveSer10PorCentoDoParaSalarioDeExatamente10000(){
+		Funcionario funcionario = new Funcionario("Rodrigo", LocalDate.now(), new BigDecimal("10000"));
+		BonusService service = new BonusService();
+		BigDecimal bonus = service.calcularBonus(funcionario);
+
+		Assertions.assertEquals(new BigDecimal("1000.00"), bonus);
+	    }
